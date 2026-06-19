@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Coleridge — Family Dashboard</title>
+
+<!-- iOS: launch as a full-screen web app (no Safari chrome) when added to Home Screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Coleridge">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120.png">
+<link rel="icon" href="apple-touch-icon-180.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Nunito:wght@600;700;800;900&display=swap');
+  :root{
+    --paper:#fbf6ec;--paper-2:#f4ecdb;--ink:#2a2a33;--ink-soft:#5c5b66;--ink-faint:#918fa0;
+    --line:#e7ddc8;
+    --marigold:#f2a93b;--coral:#f2765b;--grass:#5ba672;--sky:#4e9bc4;--grape:#8b6cb5;--rose:#e86a96;
+    --marigold-d:#cf8a23;--coral-d:#d2553c;--grass-d:#3f8657;--sky-d:#357fa8;--grape-d:#6f519a;--rose-d:#c84d79;
+    --shadow:0 2px 0 rgba(42,42,51,.05), 0 14px 30px -16px rgba(42,42,51,.3);
+    --shadow-lg:0 3px 0 rgba(42,42,51,.06), 0 22px 44px -18px rgba(42,42,51,.36);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:
+      radial-gradient(900px 500px at 8% -6%, rgba(242,169,59,.14), transparent 55%),
+      radial-gradient(900px 520px at 100% 0%, rgba(78,155,196,.13), transparent 55%),
+      var(--paper);
+    color:var(--ink);font-family:'Nunito',system-ui,sans-serif;font-weight:700;
+    -webkit-font-smoothing:antialiased;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 20px 64px}
+
+  /* ---------- Header ---------- */
+  header{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;padding:24px 4px 18px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .home-badge{width:52px;height:52px;border-radius:16px;background:linear-gradient(160deg,var(--grass),var(--grass-d));
+    display:grid;place-items:center;box-shadow:var(--shadow);flex-shrink:0}
+  .home-badge svg{width:30px;height:30px;stroke:#fff;stroke-width:2.4;fill:none}
+  .brand h1{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(24px,3.4vw,36px);margin:0;line-height:1;letter-spacing:-.01em}
+  .brand p{margin:4px 0 0;font-size:13px;font-weight:700;color:var(--ink-soft)}
+  .now{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .clock{text-align:right}
+  .clock .t{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(26px,4vw,40px);line-height:.9;font-variant-numeric:tabular-nums}
+  .clock .d{font-size:12.5px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin-top:5px}
+  .rbtn{appearance:none;border:none;background:linear-gradient(160deg,var(--sky),var(--sky-d));color:#fff;
+    font:inherit;font-weight:800;font-size:15px;padding:13px 20px;border-radius:14px;cursor:pointer;
+    display:flex;align-items:center;gap:9px;box-shadow:var(--shadow);transition:transform .12s}
+  .rbtn:active{transform:scale(.96)}
+  .rbtn svg{width:18px;height:18px;stroke:#fff;stroke-width:2.6;fill:none;transition:transform .6s}
+  .rbtn.spin svg{transform:rotate(360deg)}
+
+  /* ---------- Countdown ribbon ---------- */
+  .countdown{display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,var(--coral),var(--rose));
+    color:#fff;border-radius:20px;padding:16px 22px;margin:6px 4px 22px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+  .countdown::after{content:"";position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12)}
+  .countdown .big{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(34px,6vw,52px);line-height:.85;font-variant-numeric:tabular-nums}
+  .countdown .lbl{font-size:14px;font-weight:800;line-height:1.25;position:relative}
+  .countdown .lbl small{display:block;font-weight:700;opacity:.9;font-size:12.5px;margin-top:2px}
+
+  /* ---------- Section headers ---------- */
+  .sec{display:flex;align-items:center;gap:12px;margin:26px 4px 14px}
+  .sec h2{font-family:'Fraunces',serif;font-weight:700;font-size:23px;margin:0;letter-spacing:-.01em}
+  .sec .pill{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);
+    background:var(--paper-2);border:1px solid var(--line);padding:4px 11px;border-radius:999px}
+  .sec::after{content:"";flex:1;height:2px;background:var(--line);border-radius:2px}
+
+  /* ---------- HERO cards (today / tomorrow) ---------- */
+  .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .hcard{position:relative;border-radius:24px;padding:22px;color:#fff;box-shadow:var(--shadow-lg);overflow:hidden;
+    min-height:170px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:transform .14s}
+  .hcard:active{transform:scale(.985)}
+  .hcard .glyph{position:absolute;right:-14px;bottom:-18px;width:150px;height:150px;opacity:.92}
+  .hcard .glyph svg{width:100%;height:100%}
+  .hcard .stamp{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.22);
+    backdrop-filter:blur(2px);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+    padding:6px 12px;border-radius:999px;align-self:flex-start}
+  .hcard .ht{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(20px,2.6vw,27px);line-height:1.08;margin:14px 0 0;max-width:78%;position:relative}
+  .hcard .hmeta{font-size:13.5px;font-weight:800;margin-top:8px;display:flex;align-items:center;gap:8px;max-width:80%;position:relative}
+  .hcard .hloc{opacity:.92;font-weight:700}
+  .hcard .htag{margin-top:12px;position:relative}
+  .htag .chip{display:inline-block;background:rgba(255,255,255,.95);color:var(--ink);font-size:11px;font-weight:800;
+    text-transform:uppercase;letter-spacing:.05em;padding:5px 11px;border-radius:999px}
+
+  /* ---------- Day groups + tiles ---------- */
+  .day{margin-top:10px}
+  .dlabel{display:flex;align-items:baseline;gap:10px;margin:18px 4px 11px}
+  .dlabel .dd{font-family:'Fraunces',serif;font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+  .dlabel .dn{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft)}
+  .dlabel .rel{margin-left:auto;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+    color:#fff;background:var(--grass);padding:4px 11px;border-radius:999px;box-shadow:var(--shadow)}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:13px}
+  .tile{position:relative;border-radius:20px;padding:16px;background:var(--card,#fff);box-shadow:var(--shadow);
+    overflow:hidden;cursor:pointer;transition:transform .12s;border:2px solid transparent;min-height:128px;
+    display:flex;flex-direction:column}
+  .tile:active{transform:scale(.97)}
+  .tile .ic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;flex-shrink:0;margin-bottom:11px}
+  .tile .ic svg{width:27px;height:27px;stroke-width:2.3;fill:none}
+  .tile .when{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+  .tile .tt{font-family:'Fraunces',serif;font-weight:600;font-size:16.5px;line-height:1.16;color:var(--ink)}
+  .tile .loc{font-size:12px;font-weight:700;color:var(--ink-soft);margin-top:6px;line-height:1.3}
+  .tile .who{position:absolute;top:14px;right:14px;font-size:10.5px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.04em;padding:4px 9px;border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .tile .check{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:7px;
+    border:none;background:transparent;font:inherit;font-weight:800;font-size:12.5px;color:var(--ink-soft);
+    cursor:pointer;padding:9px 0 2px;min-height:38px}
+  .tile .box{width:22px;height:22px;border-radius:7px;border:2.5px solid var(--line);display:grid;place-items:center;transition:.15s}
+  .tile .box svg{width:13px;height:13px;stroke:#fff;stroke-width:3.2;fill:none;opacity:0;transform:scale(.5);transition:.15s}
+  .tile.done{opacity:.55}
+  .tile.done .tt{text-decoration:line-through;text-decoration-color:var(--line)}
+  .tile.done .box{background:var(--grass);border-color:var(--grass-d)}
+  .tile.done .box svg{opacity:1;transform:scale(1)}
+
+  /* color theming per kind via accent vars set inline */
+  .tile[data-accent]{border-color:var(--a-line)}
+  .tile .ic{background:var(--a-soft)}
+  .tile .ic svg{stroke:var(--a-deep)}
+  .tile .when{color:var(--a-deep)}
+  .tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--a)}
+
+  /* ---------- Further out ribbon ---------- */
+  .ribbon{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:11px}
+  .rcard{border-radius:16px;padding:14px;background:#fff;box-shadow:var(--shadow);display:flex;gap:11px;align-items:center}
+  .rcard .ric{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+  .rcard .ric svg{width:23px;height:23px;stroke-width:2.3;fill:none}
+  .rcard .rd{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
+  .rcard .rt{font-family:'Fraunces',serif;font-weight:600;font-size:14.5px;line-height:1.12;margin-top:3px;color:var(--ink)}
+
+  .foot{margin-top:34px;padding-top:18px;border-top:2px solid var(--line);text-align:center;
+    font-size:12px;font-weight:700;color:var(--ink-faint);line-height:1.7}
+
+  @media(max-width:540px){
+    .hcard{min-height:150px}
+    .tiles{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+    .now{gap:10px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="home-badge"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9.5 20v-6h5v6"/></svg></div>
+      <div><h1>The Coleridge Way</h1><p>What&rsquo;s happening at home &amp; beyond</p></div>
+    </div>
+    <div class="now">
+      <div class="clock"><div class="t" id="clock">&mdash;</div><div class="d" id="today">&mdash;</div></div>
+      <button class="rbtn" id="refresh"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh</button>
+    </div>
+  </header>
+
+  <div id="countdown"></div>
+  <div id="hero"></div>
+  <div id="next10"></div>
+  <div id="further"></div>
+
+  <p class="foot">
+    <span id="freshness">Connecting to your calendars…</span><br>
+    A live view of the family&rsquo;s Google calendars &mdash; home, family &amp; holidays.<br>
+    Tap a home or chore card to check it off; it saves right here on each device.
+  </p>
+</div>
+
+<script>
+/* ====== BIRTHDAYS ======
+   Google's auto-generated "Birthdays" calendar (from Contacts) has no
+   exportable ICS feed, so this list is a periodic snapshot — pulled
+   directly each time we refresh it together. Birthdays don't move,
+   so this needs updating only when someone's added/changed. */
+const BIRTHDAYS=[
+  {id:"bday-self",      t:"Greg's birthday",            start:"2026-06-21"},
+  {id:"bday-aaronw",    t:"Aaron Woods's birthday",      start:"2026-06-09"},
+  {id:"bday-ryan",      t:"Ryan Mucatel's birthday",     start:"2026-11-09"},
+  {id:"bday-kevin",     t:"Kevin Timothee's birthday",   start:"2026-11-30"},
+  {id:"bday-aaronm",    t:"Aaron McKee's birthday",      start:"2026-12-21"},
+  {id:"bday-matthew",   t:"Matthew Urbano's birthday",   start:"2027-01-16"},
+  {id:"bday-tamika",    t:"Tamika Timothee's birthday",  start:"2027-04-21"},
+  {id:"bday-sue",       t:"Sue Larson's birthday",       start:"2027-05-25"}
+].map(b=>({...b,type:"allday",kind:"bday",major:true}));
+/* Paste your deployed Cloudflare Worker URL here after setup: */
+const WORKER_URL="https://coleridge-calendar.gregoryurbano.workers.dev";
+const CLOSING="2026-06-26T14:00:00-04:00";
+
+/* EVENTS is now populated live from the Worker. A baked-in fallback set
+   keeps the dashboard useful if the network/Worker is unreachable. */
+let EVENTS=[];
+const FALLBACK=[
+  {id:"closing-day",t:"Closing Day — the keys are ours!",start:"2026-06-26",type:"allday",kind:"move",who:"Both",hero:true,major:true},
+  {id:"moving-day",t:"Moving Day!",start:"2026-06-27",type:"allday",kind:"move",who:"Both",hero:true,major:true},
+  {id:"hvac-filter",t:"Replace the HVAC filter",start:"2026-07-04T09:00:00",type:"timed",kind:"upkeep",who:"Greg",major:true}
+];
+
+/* ====== CLASSIFIER ======
+   Live ICS events carry only a title + calendar. We infer the visual "kind"
+   (color + character), the owner, and whether it's a "major" headline item,
+   from keywords. Order matters: earlier rules win. */
+const RULES=[
+  {kind:"health", major:true,  re:/dentist|doctor|\bdr\.?\b|pediatric|checkup|check-?up|appointment.*cleaning|cleaning.*dr/i},
+  {kind:"upkeep", major:true,  re:/hvac|filter|gutter|septic|smoke|co detector|deck|insurance|property tax|re-?key|locksmith|ev charger/i},
+  {kind:"move",   major:true,  re:/moving day|netmove|movers|move-?in|move-?out|walkthrough/i},
+  {kind:"keys",   major:true,  re:/closing|campbell|brannon|sign at/i},
+  {kind:"delivery",major:true, re:/delivery|delivered|home depot/i},
+  {kind:"party",  major:true,  re:/party|housewarming|bbq|cookout/i},
+  {kind:"bday",   major:true,  re:/birthday|bday|b-day/i},
+  {kind:"food",   major:false, re:/dinner|lunch|brunch|restaurant|reservation|santorini/i},
+  {kind:"sport",  major:false, re:/golf|gym|practice|game|swim/i},
+  {kind:"selfcare",major:false,re:/nails|hair|salon|spa|massage/i},
+  {kind:"travel", major:false, re:/vegas|flight|trip|vacation|airport|\bin [A-Z][a-z]+ for/i},
+  {kind:"clean",  major:false, re:/clean|carpet/i},
+  {kind:"holiday",major:false, re:/juneteenth|independence|father'?s day|mother'?s day|christmas|thanksgiving|new year|halloween|holiday|memorial day|labor day/i},
+  {kind:"chore",  major:false, re:/trash|garbage|recycl|water .*plant|plant!|laundry/i},
+  {kind:"errand", major:false, re:/goodwill|drop-?off|pick ?up|\bcall \b|costco|grocery|store|delivery arrives|arrives/i}
+];
+function classify(title){
+  for(const r of RULES) if(r.re.test(title)) return r;
+  return {kind:"event", major:false};
+}
+function whoFrom(title){
+  const s=title.toLowerCase();
+  const greg=/\bgreg\b|greg'?s/.test(s), stef=/\bstef\b|stef'?s|stefanie/.test(s);
+  if(greg&&!stef)return"Greg"; if(stef&&!greg)return"Stef"; return"Both";
+}
+/* "event" kind has no palette/icon of its own — map it to a friendly default */
+const DEFAULT_KIND="errand";
+
+/* ---- palette per kind ---- */
+const KIND={
+  move:{c:"coral",label:"Moving"},keys:{c:"marigold",label:"Closing"},upkeep:{c:"grass",label:"Home upkeep"},
+  delivery:{c:"sky",label:"Delivery"},clean:{c:"sky",label:"Cleaning"},chore:{c:"grass",label:"Chore"},
+  holiday:{c:"marigold",label:"Holiday"},bday:{c:"grape",label:"Birthday"},party:{c:"rose",label:"Party"},
+  food:{c:"coral",label:"Dinner"},sport:{c:"grass",label:"Outing"},selfcare:{c:"grape",label:"Self-care"},
+  travel:{c:"sky",label:"Travel"},errand:{c:"marigold",label:"Errand"},health:{c:"rose",label:"Health"},
+  event:{c:"sky",label:"On the calendar"}
+};
+const COLORS={coral:["#f2765b","#d2553c","#fde3dc"],marigold:["#f2a93b","#cf8a23","#fceccf"],
+  grass:["#5ba672","#3f8657","#dcefe1"],sky:["#4e9bc4","#357fa8","#dceaf3"],
+  grape:["#8b6cb5","#6f519a","#e7ddf1"],rose:["#e86a96","#c84d79","#fbdce7"]};
+
+/* ---- SVG characters (stroke icons; inherit accent stroke) ---- */
+const ICON={
+  move:'<path d="M3 6h11v9H3z"/><path d="M14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>',
+  keys:'<circle cx="8" cy="8" r="4"/><path d="M11 11l8 8"/><path d="M16 16l2-2"/><path d="M19 19l1.5-1.5"/>',
+  upkeep:'<path d="M14 6a4 4 0 0 0-5 5l-6 6 2 2 6-6a4 4 0 0 0 5-5l-2.5 2.5L11 9z"/>',
+  delivery:'<path d="M3 7h10v8H3z"/><path d="M13 10h5l3 3v2h-8z"/><circle cx="7" cy="17" r="1.6"/><circle cx="17" cy="17" r="1.6"/>',
+  clean:'<path d="M7 3v8"/><path d="M5 11h4l1 9H4z"/><path d="M7 3c3 0 4 2 4 4"/>',
+  chore:'<path d="M5 8h14l-1 12H6z"/><path d="M9 8V5h6v3"/>',
+  holiday:'<path d="M12 3l2.5 5 5.5.5-4 4 1 5.5L12 20l-5 3 1-5.5-4-4 5.5-.5z"/>',
+  bday:'<path d="M5 21h14v-7H5z"/><path d="M5 14c2-2 3 0 3.5 0s1.5-2 3.5 0 3 0 3.5 0 1.5-2 3.5 0"/><path d="M12 5v4"/><circle cx="12" cy="4" r="1"/>',
+  party:'<path d="M4 20l5-13 7 7z"/><path d="M14 5c2 0 3 1 3 3"/><circle cx="18" cy="11" r="1"/><circle cx="15" cy="4" r="1"/>',
+  food:'<path d="M5 3v7a3 3 0 0 0 6 0V3"/><path d="M8 10v11"/><path d="M17 3c-2 1-3 3-3 6h3z"/><path d="M17 9v12"/>',
+  sport:'<circle cx="12" cy="7" r="2"/><path d="M12 9v6"/><path d="M9 21l3-6 3 6"/><path d="M7 12h10"/>',
+  selfcare:'<path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z"/>',
+  travel:'<path d="M10 3l1 7 8 3-8 1-2 6-1-6-5-1 5-1z"/>',
+  errand:'<path d="M6 7h13l-1.5 9H8z"/><path d="M6 7L5 4H3"/><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/>',
+  health:'<path d="M12 4v4M10 6h4"/><path d="M6 10h12l-1 9H7z"/>',
+  event:'<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16"/><path d="M8 3v4M16 3v4"/>'
+};
+/* big hero glyphs (filled, soft white) */
+const HERO_GLYPH={
+  move:'<g fill="rgba(255,255,255,.9)"><rect x="14" y="40" width="62" height="50" rx="6"/><path d="M76 54h18l16 16v20H76z"/><circle cx="34" cy="98" r="9" fill="rgba(255,255,255,.6)"/><circle cx="92" cy="98" r="9" fill="rgba(255,255,255,.6)"/></g>',
+  keys:'<g fill="rgba(255,255,255,.9)"><circle cx="42" cy="42" r="22"/><circle cx="42" cy="42" r="9" fill="none" stroke="currentColor"/><rect x="56" y="56" width="50" height="13" rx="6" transform="rotate(45 60 60)"/></g>'
+};
+
+const LS="coleridge:fam:v1";
+let store=load();
+function load(){try{return JSON.parse(localStorage.getItem(LS))||{done:{}}}catch(e){return{done:{}}}}
+function save(){try{localStorage.setItem(LS,JSON.stringify(store))}catch(e){}}
+
+function parse(s){return s.length===10?new Date(s+"T00:00:00"):new Date(s)}
+function sod(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function key(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function ftime(d){let h=d.getHours(),m=d.getMinutes();const ap=h>=12?"pm":"am";h=h%12||12;return m?h+":"+String(m).padStart(2,"0")+ap:h+ap}
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],DOWL=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function rel(d,t){const n=Math.round((sod(d)-sod(t))/864e5);return n===0?"Today":n===1?"Tomorrow":n<7?"In "+n+" days":""}
+function esc(s){return(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function occurs(ev,k,t){
+  const s=sod(parse(ev.start));
+  // Only treat as a multi-day span when the event actually crosses day boundaries
+  // (e.g. all-day events with an exclusive end date, or trips spanning days).
+  if(ev.end){
+    const e=sod(parse(ev.end));
+    if(e>s){ // genuine multi-day span — match any day it covers (end is exclusive)
+      for(let d=new Date(s);d<e;d.setDate(d.getDate()+1)) if(key(d)===k) return true;
+      return false;
+    }
+  }
+  // single-day event (timed or all-day with same-day/no end) — match its start day
+  return key(s)===k;
+}
+function accentVars(c){const a=COLORS[c];return"--a:"+a[0]+";--a-deep:"+a[1]+";--a-soft:"+a[2]+";--a-line:"+a[0]+"55"}
+function canCheck(ev){return ev.kind==="upkeep"||ev.kind==="chore"}
+
+function render(){
+  const now=new Date(),t=sod(now);
+  const tenEnd=new Date(t);tenEnd.setDate(tenEnd.getDate()+10);
+  const thirtyEnd=new Date(t);thirtyEnd.setDate(thirtyEnd.getDate()+30);
+  document.getElementById("clock").textContent=ftime(now);
+  document.getElementById("today").textContent=DOWL[now.getDay()]+" · "+MON[now.getMonth()]+" "+now.getDate();
+  countdown(now);
+  hero(t);
+  next10(t,tenEnd);
+  further(tenEnd,thirtyEnd);
+  const fn=document.getElementById("freshness");if(fn)fn.textContent=freshness();
+  wire();
+}
+
+function countdown(now){
+  const el=document.getElementById("countdown");
+  const close=new Date(CLOSING);const days=Math.ceil((sod(close)-sod(now))/864e5);
+  if(days<0){el.innerHTML="";return}
+  const big=days===0?"Today":days;const lbl=days===0?"is Closing Day":(days===1?"day until we close":"days until we close");
+  el.innerHTML='<div class="countdown"><div class="big">'+big+'</div><div class="lbl">'+lbl+
+    '<small>1045 Coleridge Way · Fri Jun 26</small></div></div>';
+}
+
+function hero(t){
+  const el=document.getElementById("hero");
+  const tmr=new Date(t);tmr.setDate(tmr.getDate()+1);
+  const todayK=key(t),tmrK=key(tmr);
+  let pick=EVENTS.filter(ev=>(occurs(ev,todayK,t)||occurs(ev,tmrK,t))&&(ev.hero||ev.major||ev.type==="timed"))
+    .sort((a,b)=>parse(a.start)-parse(b.start)).slice(0,2);
+  if(!pick.length){
+    pick=EVENTS.filter(ev=>parse(ev.start)>=t).sort((a,b)=>parse(a.start)-parse(b.start)).slice(0,2);
+  }
+  if(!pick.length){el.innerHTML="";return}
+  el.innerHTML='<div class="hero">'+pick.map(ev=>{
+    const s=parse(ev.start),c=KIND[ev.kind].c,col=COLORS[c];
+    const day=key(s)===todayK?"Today":key(s)===tmrK?"Tomorrow":DOW[s.getDay()];
+    const when=ev.type==="allday"?day:day+" · "+ftime(s);
+    const glyph=HERO_GLYPH[ev.kind]?'<div class="glyph" style="color:'+col[1]+'"><svg viewBox="0 0 120 120">'+HERO_GLYPH[ev.kind]+'</svg></div>':'';
+    return '<div class="hcard" style="background:linear-gradient(150deg,'+col[0]+','+col[1]+')">'+glyph+
+      '<span class="stamp">'+esc(when)+'</span>'+
+      '<div><div class="ht">'+esc(ev.t)+'</div>'+
+      (ev.loc?'<div class="hmeta"><span class="hloc">📍 '+esc(ev.loc)+'</span></div>':'')+
+      '<div class="htag"><span class="chip">'+KIND[ev.kind].label+'</span></div></div></div>';
+  }).join("")+'</div>';
+}
+
+function tile(ev,t){
+  const s=parse(ev.start),c=KIND[ev.kind].c;
+  const when=ev.type==="allday"?"All day":ftime(s);
+  const done=store.done[ev.id]?"done":"";
+  const who=ev.who&&ev.who!=="Both"?'<span class="who">'+esc(ev.who)+'</span>':'';
+  const chk=canCheck(ev)?'<button class="check" data-done="'+ev.id+'"><span class="box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>'+(store.done[ev.id]?"Done":"Mark done")+'</button>':'';
+  return '<div class="tile '+done+'" style="'+accentVars(c)+'" data-accent="'+c+'">'+who+
+    '<div class="ic"><svg viewBox="0 0 24 24">'+ICON[ev.kind]+'</svg></div>'+
+    '<div class="when">'+esc(when)+' · '+KIND[ev.kind].label+'</div>'+
+    '<div class="tt">'+esc(ev.t)+'</div>'+
+    (ev.loc?'<div class="loc">📍 '+esc(ev.loc)+'</div>':'')+chk+'</div>';
+}
+
+function next10(t,tenEnd){
+  const el=document.getElementById("next10");
+  let html='<div class="sec"><h2>The next ten days</h2><span class="pill">everything</span></div>';
+  let any=false;
+  for(let d=new Date(t);d<tenEnd;d.setDate(d.getDate()+1)){
+    const k=key(d);
+    const list=EVENTS.filter(ev=>occurs(ev,k,t)).sort((a,b)=>{
+      const aa=a.type==="allday"?0:1,bb=b.type==="allday"?0:1;return aa!==bb?aa-bb:parse(a.start)-parse(b.start)});
+    if(!list.length)continue;any=true;
+    const r=rel(d,t);
+    html+='<div class="day"><div class="dlabel"><span class="dd">'+MON[d.getMonth()]+" "+d.getDate()+
+      '</span><span class="dn">'+DOWL[d.getDay()]+'</span>'+(r?'<span class="rel">'+r+'</span>':'')+'</div>'+
+      '<div class="tiles">'+list.map(ev=>tile(ev,t)).join("")+'</div></div>';
+  }
+  if(!any)html+='<div class="foot">A rare quiet stretch — nothing on the calendar.</div>';
+  el.innerHTML=html;
+}
+
+function further(tenEnd,thirtyEnd){
+  const el=document.getElementById("further");
+  const items=EVENTS.filter(ev=>{const s=sod(parse(ev.start));return ev.major&&s>=tenEnd&&s<thirtyEnd})
+    .sort((a,b)=>parse(a.start)-parse(b.start));
+  if(!items.length){el.innerHTML="";return}
+  el.innerHTML='<div class="sec"><h2>Further out</h2><span class="pill">11–30 days</span></div><div class="ribbon">'+
+    items.map(ev=>{const s=parse(ev.start),c=KIND[ev.kind].c,col=COLORS[c];
+      return '<div class="rcard"><div class="ric" style="background:'+col[2]+'"><svg viewBox="0 0 24 24" style="stroke:'+col[1]+'">'+ICON[ev.kind]+'</svg></div>'+
+        '<div><div class="rd">'+DOW[s.getDay()]+" · "+MON[s.getMonth()]+" "+s.getDate()+'</div><div class="rt">'+esc(ev.t)+'</div></div></div>';
+    }).join("")+'</div>';
+}
+
+function wire(){
+  document.querySelectorAll("[data-done]").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();const id=b.getAttribute("data-done");
+    store.done[id]=store.done[id]?0:Date.now();save();render();
+  });
+}
+/* ====== LIVE DATA LAYER ====== */
+let lastFetch=null, fetchError=null;
+
+function mapLiveEvent(e){
+  // e: {uid,title,start,end,allday,location,calendar} from Worker
+  const r=classify(e.title);
+  return {
+    id:e.uid,
+    t:e.title,
+    start:e.start,
+    end:e.end||undefined,
+    type:e.allday?"allday":"timed",
+    kind:r.kind==="event"?DEFAULT_KIND:r.kind,
+    rawkind:r.kind,
+    who:whoFrom(e.title),
+    loc:e.location||undefined,
+    major:!!r.major,
+    hero:/moving day|closing day/i.test(e.title)
+  };
+}
+
+async function pullLive(){
+  if(/REPLACE-ME/.test(WORKER_URL)){ // not configured yet
+    EVENTS=FALLBACK.slice().concat(BIRTHDAYS); fetchError="demo"; return;
+  }
+  try{
+    const r=await fetch(WORKER_URL,{cache:"no-store"});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const data=await r.json();
+    EVENTS=(data.events||[]).map(mapLiveEvent).concat(BIRTHDAYS);
+    lastFetch=new Date();
+    fetchError=(data.errors&&data.errors.length)?data.errors.join(", "):null;
+  }catch(err){
+    fetchError=String(err);
+    if(!EVENTS.length)EVENTS=FALLBACK.slice().concat(BIRTHDAYS); // keep last good data if we had it
+  }
+}
+
+async function refresh(spinBtn){
+  if(spinBtn)spinBtn.classList.add("spin");
+  await pullLive();
+  render();
+  if(spinBtn)setTimeout(()=>spinBtn.classList.remove("spin"),650);
+}
+
+document.getElementById("refresh").onclick=function(){refresh(this)};
+
+/* status line about data freshness, shown in footer */
+function freshness(){
+  if(fetchError==="demo")return"Demo mode — add your Worker URL to go live.";
+  if(fetchError)return"Couldn't reach the calendar ("+esc(fetchError)+") — showing last known plans.";
+  if(lastFetch)return"Live from Google · updated "+ftime(lastFetch);
+  return"";
+}
+
+/* ====== BOOT ====== */
+(async function(){
+  await pullLive();
+  render();
+  setInterval(render,60000);                 // clock + day rollover
+  setInterval(()=>refresh(null),15*60000);   // re-pull live data every 15 min
+})();
+</script>
+</body>
+</html>
